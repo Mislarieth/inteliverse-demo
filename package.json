@@ -1,0 +1,28 @@
+{
+  "name": "inteliverse-demo",
+  "version": "1.0.0",
+  "description": "A distributed, mutable, peer-to-peer public knowledge network",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mislarieth/inteliverse-demo.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Mislarieth/inteliverse-demo/issues"
+  },
+  "homepage": "https://github.com/Mislarieth/inteliverse-demo#readme",
+  "dependencies": {
+    "axios": "^0.16.2",
+    "cryptico": "^1.0.2",
+    "express": "^4.16.2",
+    "hapi": "^16.0.0",
+    "uuid": "^3.1.0"
+  },
+  "devDependencies": {},
+  "keywords": []
+}

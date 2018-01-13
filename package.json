@@ -4,7 +4,8 @@
   "description": "A distributed, mutable, peer-to-peer public knowledge network",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./node_modules/.bin/mocha tests --reporter spec",
+    "start": "nodejs index.js"
   },
   "repository": {
     "type": "git",
@@ -23,6 +24,10 @@
     "hapi": "^16.0.0",
     "uuid": "^3.1.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "mocha": "^4.1.0",
+    "request": "^2.83.0"
+  },
   "keywords": []
 }

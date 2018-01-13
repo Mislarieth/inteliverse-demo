@@ -114,12 +114,21 @@ server.route({
   }
 });
 
+
+/*
+  TAKES INPUTS:
+    version: version of the block the person wants to change
+    data: data person wants to change it to
+*/
 server.route({
     method: 'POST',
     path:'/changedata',
     handler: function (request, reply) {
       console.log(request.payload);
         var result=request.payload;
+        if(result.version != presentblock.version){
+          return reply("Failure: not on present block");
+        }        
         pastblock=presentblock;
         presentblock=changeablock(pastblock,result);
         reply(presentblock);

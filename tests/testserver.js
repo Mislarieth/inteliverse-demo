@@ -2,6 +2,11 @@ var expect  = require("chai").expect;
 var request = require("request");
 var path = require('path');
 var aiolos = require(path.join(__dirname, '..','Aiolos','aiolos.js'));
+var ipaddress;
+require('dns').lookup(require('os').hostname(), function (err, add, fam) {
+  ipaddress=add;
+})
+
 
 
 describe('Aiolos', function() {
@@ -27,7 +32,7 @@ describe('Aiolos', function() {
 });
 
 describe('Aiolos Host',function(){
-  var url="http://192.168.1.15:8080/";
+  var url="http://127.0.1.1:8080/";
   var presentblock={};
   var pastblock={};
   it('should be able to create a new data block',function(done){

@@ -204,3 +204,185 @@ server.start((err) => {
     }
     console.log('Server running at:', server.info.uri);
 });
+
+
+/*
+var crypto = require('crypto');
+const Hapi = require('hapi');
+const server = new Hapi.Server();
+
+
+var hash=function(obj){
+  const hashbase = crypto.createHash('sha256');
+  hashbase.update(JSON.stringify(obj));
+  return hashbase.digest('hex');
+}
+
+var maptoobject=function(map){
+  var dataobject={}
+  map.forEach(function(key,value,m){
+    console.log(key);
+    console.log(value);
+    dataobject[key]=value;
+    console.log(dataobject);
+  });
+  return dataobject;
+}
+
+var objecttomap=function(object){
+  var map=new Map();
+  var keys=Object.keys(object);
+  var key="";
+  for(i in keys){
+    key=keys[i];
+    map.set(key,object[key]);
+  }
+  return map;
+}
+
+
+var metadata={
+  blockid:"25kdksl",  //permanent id of the block
+  version:"dklsl"     //DAG hash that is result of the hash of previous version with current keys
+}
+
+var data = new Map(); //map to hold data
+data.set("key1", {  //permanent id of row
+  version:"ad5k3l",   //DAG hash that is a result of the hash of the previous version with the present data
+  value:"meow"    //current value that
+});
+data.set("key2",{
+  version:"kd2ls",
+  value:"hamster"
+});
+data.set("key3",{
+  version: "k3k4d",
+  value: "mreow"
+});
+console.log(data);
+
+
+
+
+server.connection({
+    port: 8080
+});
+
+server.route({
+  //literally just reply the data
+  method: 'GET',
+  path: '/invoke/getdata/',
+  handler: function(request,reply){
+    reply(maptoobject(data));
+  }
+})
+
+server.route({
+  //literally just reply the metadata
+  method: 'GET',
+  path: '/invoke/getmetadata/',
+  handler: function(request,reply){
+    reply(metadata)
+  }
+})
+
+server.route({
+    //add a new row to the block
+    method: 'POST',
+    path:'/invoke/addrow',
+    handler: function (request, reply) {
+        var result;
+        var value = request.payload.value; //could be null
+
+        if(!value){
+          return reply("Please provide a value");
+        }
+        //TODO: generate commit to send out
+
+        var rowid = hash(Math.random());
+
+        data.set(rowid,{
+          version:hash(value),
+          value:value
+        })
+        metadata.version=hash(hash(metadata.version)+hash(data.keys()));
+
+        reply(data.get(rowid));
+
+    }
+});
+
+server.route({
+    //remove and existing row from the block
+    method: 'POST',
+    path:'/invoke/deleterow',
+    handler: function (request, reply) {
+        var result;
+        var rowid = request.payload.rowid; //could be null
+
+        if(!rowid){
+          return reply("Please provide a rowid");
+        }
+        //TODO: generate commit to send out
+
+        if(data.get(rowid)){
+          data.delete(rowid);
+          metadata.version=hash(hash(metadata.version)+hash(data.keys()));
+
+          reply(data);
+        }else{
+          reply("Row "+rowid+" does not exist");
+        }
+
+
+    }
+});
+
+server.route({
+    //change a row's value
+    method: 'POST',
+    path:'/invoke/changerow',
+    handler: function (request, reply) {
+        var result;
+        var rowid = request.payload.rowid; //id of row to change value of
+        var value = request.payload.value; //value to change row to
+
+        if(!rowid){
+          return reply("Please provide a rowid")
+        }
+        if(!value){
+          return reply("Please provide a value")
+        }
+
+        //TODO: generate commit to send out
+
+        //set the row value
+        if(data.get(rowid)){
+          var olddata=data.get(rowid);
+          var newversion=hash(hash(olddata.version)+hash(value));
+
+          var newobject={}
+          newobject.version=newversion;
+          newobject.value=value;
+          data.set(rowid,newobject);
+
+
+          reply(data.get(rowid));
+        }else{
+
+          reply("Row "+rowid+" does not exist");
+        }
+
+
+    }
+});
+
+
+server.start((err) => {
+
+    if (err) {
+        throw err;
+    }
+    console.log('Server running at:', server.info.uri);
+});
+*/

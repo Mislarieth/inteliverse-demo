@@ -1,3 +1,6 @@
+/*
+  In a block, each message has its own sidechain managed
+*/
 var block={
   blockid:34,
   commits:[

@@ -1,59 +1,76 @@
-const uuidv4 = require('uuid/v4');
-var crypto = require('crypto');
+const Block = require('./Block.js');
 
-const hash = crypto.createHash('sha256');
-var hashit=function(obj){
-  const hash = crypto.createHash('sha256');
-  hash.update(JSON.stringify(obj));
-  return hash.digest('hex');
+
+var hash = Block.hash;
+var genid=Block.genid;
+
+var block={};
+
+/*
+  Initialize your program here.
+  set the initial data, etc.
+*/
+var init=function(b){
+  block=new Block.block(b.metadata,b.data);
 }
 
-var block={
-  data:{}//,
-//  hosts:[],
-//  commits:[]
+var getblock=function(){
+  return block;
 }
 
-
-
-var setData=function(d){
-  block.data=d;
-  return true;
-}
-
-var getData=function(){
+var getdata=function(){
   return block.data;
 }
+var getmetadata=function(){
+  return block.metadata;
+}
 
-var getValueOfAccount=function(accountkey){
-    return block.data[accountkey];
-}
-var addNewAccount=function(){
-    var newkey=hashit(uuidv4());
-    block.data[newkey]=0;
-    return newkey;
-}
-var depositValueToAccount=function(accountkey,depositval){
-  if(block.data[accountkey]){
-    block.data[accountkey]+=depositval;
-    return true;
-  }else{
-    return false;
+var addrow = function(value){
+  //add a new row to the block
+
+  var rowid = genid();
+
+  block.data[rowid]={
+    version:hash(value),
+    value:value
   }
-
+  block.metadata.version=hash(hash(block.metadata.version)+hash(Object.keys(block.data)));
+  return block.data[rowid];
 }
-var withdrawValueFromAccount=function(accountkey,withdrawval){
-  if(block.data[accountkey]){
-    block.data[accountkey]-=withdrawval;
-    return true;
+
+var deleterow = function(rowid){
+  //remove an existing row from the block
+  if(block.data[rowid]){
+    delete block.data[rowid];
+    block.metadata.version=hash(hash(block.metadata.version)+hash(Object.keys(block.data)));
+
+    return block.data;
   }else{
-    return false;
+    return "Row "+rowid+" does not exist";
   }
 }
 
-exports.setData=setData;
-exports.getData=getData;
-exports.getValueOfAccount=getValueOfAccount;
-exports.addNewAccount=addNewAccount;
-exports.depositValueToAccount=depositValueToAccount;
-exports.withdrawValueFromAccount=withdrawValueFromAccount;
+var changerow = function(rowid,value){
+  //change a row's value
+  if(block.data[rowid]){
+    var olddata=block.data[rowid];
+    var newversion=hash(hash(olddata.version)+hash(value));
+
+    block.data[rowid].version=newversion;
+    block.data[rowid].value=value;
+
+
+    return block.data[rowid];
+  }else{
+
+    return "Row "+rowid+" does not exist";
+  }
+}
+
+exports.addrow=addrow;
+exports.deleterow=deleterow;
+exports.changerow=changerow;
+exports.init=init;
+exports.getdata=getdata;
+exports.getmetadata=getmetadata;
+exports.getblock=getblock;

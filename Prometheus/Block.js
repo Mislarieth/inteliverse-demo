@@ -46,6 +46,43 @@ function block(initialmeta,initialdata){
   }else{
     this.data={}
   }
+  this.addRow = function(value){
+    //add a new row to the block
+
+    var rowid = genid();
+
+    this.data[rowid]={
+      version:hash(value),
+      value:value
+    }
+    this.metadata.version=hash(hash(this.metadata.version)+hash(Object.keys(this.data)));
+    return this.data[rowid];
+  }
+  this.deleteRow=function(rowid){
+    if(this.data[rowid]){
+      delete this.data[rowid];
+      this.metadata.version=hash(hash(this.metadata.version)+hash(Object.keys(this.data)));
+
+      return this.data;
+    }else{
+      return "Row "+rowid+" does not exist";
+    }
+  }
+  this.changeRow=function(rowid,value){
+    if(this.data[rowid]){
+      var olddata=this.data[rowid];
+      var newversion=hash(hash(olddata.version)+hash(value));
+
+      this.data[rowid].version=newversion;
+      this.data[rowid].value=value;
+
+
+      return this.data[rowid];
+    }else{
+
+      return "Row "+rowid+" does not exist";
+    }
+  }
 
 }
 

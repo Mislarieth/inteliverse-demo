@@ -26,45 +26,18 @@ var getmetadata=function(){
 }
 
 var addrow = function(value){
-  //add a new row to the block
 
-  var rowid = genid();
-
-  block.data[rowid]={
-    version:hash(value),
-    value:value
-  }
-  block.metadata.version=hash(hash(block.metadata.version)+hash(Object.keys(block.data)));
-  return block.data[rowid];
+  return block.addRow(value);
 }
 
 var deleterow = function(rowid){
   //remove an existing row from the block
-  if(block.data[rowid]){
-    delete block.data[rowid];
-    block.metadata.version=hash(hash(block.metadata.version)+hash(Object.keys(block.data)));
-
-    return block.data;
-  }else{
-    return "Row "+rowid+" does not exist";
-  }
+  return block.deleteRow(rowid);
 }
 
 var changerow = function(rowid,value){
   //change a row's value
-  if(block.data[rowid]){
-    var olddata=block.data[rowid];
-    var newversion=hash(hash(olddata.version)+hash(value));
-
-    block.data[rowid].version=newversion;
-    block.data[rowid].value=value;
-
-
-    return block.data[rowid];
-  }else{
-
-    return "Row "+rowid+" does not exist";
-  }
+   return block.changeRow(rowid,value);
 }
 
 exports.addrow=addrow;

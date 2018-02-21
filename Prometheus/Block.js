@@ -34,7 +34,7 @@ function block(initialmeta,initialdata){
 
   }
   if(!this.metadata.blockid){
-    this.metadata.blockid=hash(genid);
+    this.metadata.blockid=hash(genid());
   }
 
   if(!this.metadata.version){

@@ -46,7 +46,6 @@ describe('Prometheus Real-Time',function(){
         block.blockid=blockmeta.blockid;
         var m=JSON.stringify({type:"Action Request",action:{blockid:block.blockid,rulesfunction:"getdata",inputdata:{}}});
         ws.send(m)
-        console.log(m);
 
       }else if(message.type=="Action Request Error"){
         var errormsg=message.data;
@@ -54,8 +53,8 @@ describe('Prometheus Real-Time',function(){
       }else if(message.type=="Action Request Response"){
         var m=JSON.stringify({type:"Action Request",action:{blockid:block.blockid,rulesfunction:"getdata",inputdata:{}}});
 
-        console.log("message");
         expect(message.meta.message).to.equal(Block.hash(m))
+        console.log(message.data);
         done();
       }
 

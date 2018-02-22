@@ -40,6 +40,7 @@ const wss = new WebSocket.Server({ port: 8080 }, function(){
 });
 
 wss.on('connection', function connection(ws) {
+//  console.log(ws);
   ws.on('message', function incoming(message) {
     var text=message;
     message=JSON.parse(message);
@@ -47,20 +48,27 @@ wss.on('connection', function connection(ws) {
       message type is the language
     */
     if(message.type=="Action Request"){
+      //don't have block
       if(message.action.blockid!=rules.getmetadata().blockid){
         ws.send(JSON.stringify({type:"Action Request Error",data:`The submitted block id ${message.action.blockid} is not located here. We do have ${rules.getmetadata().blockid}`}));
+        ws.close();
       }else{
+        //have the block
+
+        //is requested rulesfuction in our rules?
         var response=rules[message.action.rulesfunction];
         if(response){
+          var repply;
           if(message.action.inputdata){
             response=response(message.action.inputdata);
           }else{
             response=response();
           }
-          console.log(message);
           ws.send(JSON.stringify({type:"Action Request Response",data:response,meta:{message:Block.hash(text)}}));
+          ws.close();
         }else{
           ws.send(JSON.stringify({type:"Action Request Error",data:`The requested function ${message.action.rulesfunction} is not located in ${rules.getmetadata().blockid}`}));
+          ws.close();
         }
       }
     }

@@ -58,14 +58,26 @@ wss.on('connection', function connection(ws) {
         //is requested rulesfuction in our rules?
         var response=rules[message.action.rulesfunction];
         if(response){
+          var isArray=false;
           var repply;
           if(message.action.inputdata){
-            response=response(message.action.inputdata);
+            if(Array.isArray(message.action.inputdata)){
+              response=response.apply(null,message.action.inputdata);
+              isArray=true;
+            }else{
+              ws.send(JSON.stringify({type:"Action Request Error",data:`The inputdata must be an array `}));
+              ws.close();
+              return;
+            }
+
           }else{
             response=response();
           }
-          ws.send(JSON.stringify({type:"Action Request Response",data:response,meta:{message:Block.hash(text)}}));
-          ws.close();
+          if(isArray){
+            var messaage=JSON.stringify({type:"Action Request Response",data:response,meta:{message:Block.hash(text)}});
+            ws.send(messaage);
+            ws.close();
+          }
         }else{
           ws.send(JSON.stringify({type:"Action Request Error",data:`The requested function ${message.action.rulesfunction} is not located in ${rules.getmetadata().blockid}`}));
           ws.close();

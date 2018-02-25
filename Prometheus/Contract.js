@@ -26,7 +26,6 @@ var getmetadata=function(){
 }
 
 var addrow = function(value){
-
   return block.addRow(value);
 }
 
@@ -35,14 +34,14 @@ var deleterow = function(rowid){
   return block.deleteRow(rowid);
 }
 
-var changerow = function(rowid,value){
+var setrow = function(rowid,value){
   //change a row's value
-   return block.changeRow(rowid,value);
+   return block.setRow(rowid,value);
 }
 
 exports.addrow=addrow;
 exports.deleterow=deleterow;
-exports.changerow=changerow;
+exports.setrow=setrow;
 exports.init=init;
 exports.getdata=getdata;
 exports.getmetadata=getmetadata;

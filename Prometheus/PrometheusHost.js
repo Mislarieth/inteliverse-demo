@@ -1,12 +1,12 @@
 const Hapi = require('hapi');
 const Block = require('./Block.js');
 const rules = require('./Contract.js');
+const cryptoprom=require('./PrometheusCrypto.js');
 
 const WebSocket = require('ws');
 
 
-
-
+var identity=cryptoprom.generateRSA();
 
 
 var gencommit=function(request){
@@ -45,7 +45,8 @@ wss.on('connection', function connection(ws) {
     var text=message;
     message=JSON.parse(message);
     /*
-      message type is the language
+      Action Request message:
+      {type:"Action Request",action:{blockid:block.metadata.blockid,rulesfunction:"getdata",inputdata:[]}}
     */
     if(message.type=="Action Request"){
       //don't have block
@@ -83,7 +84,20 @@ wss.on('connection', function connection(ws) {
           ws.close();
         }
       }
+    }else if(message.type=="Identity Request"){
+      /*
+        Identity Request message
+        {type:"Identity Request Message",nonce:"dfk32k3nnslkdkfj23kn3lskdkfljl2k3nlk3nlfkn"}
+      */
+      if(message.nonce){
+        var signedString=cryptoprom.signString(message.nonce,identity[0]);
+        ws.send(JSON.stringify({type:"Identity Response",signature:signedString}));
+      }else{
+        ws.send(JSON.stringify({type:"Identity Request Error",data:`No nonce defined`}));
+        ws.close();
+      }
+
     }
   });
-  ws.send(JSON.stringify({type:"Acknowledgement",data:rules.getmetadata(),response:'Accepted Request'}));
+  ws.send(JSON.stringify({type:"Acknowledgement",publicID:identity[1],data:rules.getmetadata(),response:'Accepted Request'}));
 });

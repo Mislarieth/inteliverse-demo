@@ -3,23 +3,43 @@ var path = require('path');
 var NodeRSA = require('node-rsa');
 const WebSocket = require('ws');
 const Block = require('../Prometheus/Block.js')
+const cryptoprom=require('../Prometheus/PrometheusCrypto.js');
 
 
 describe("Crypto",function(){
+  this.timeout(15000);
   var key = new NodeRSA({b: 512});
-  it("can encrypt and decrypt messages",function(){
-
-    //console.log(key);
-
-    var text = 'Hello RSA!';
-    var encrypted = key.encrypt(text, 'base64');
-    var decrypted = key.decrypt(encrypted, 'utf8');
-    expect(decrypted).to.equal(text);
+  it("can generate RSA keys",function(done){
+    var keys=cryptoprom.generateRSA();
+    expect(keys.length==2);
+    done();
   });
+  it("can encrypt with public and be decrypted with private",function(done){
+    var keys=cryptoprom.generateRSA();
+    var encrypted=cryptoprom.encrypt(keys[1],"meow");
+    var decrypted=cryptoprom.decrypt(keys[0],encrypted);
+    expect(decrypted).to.equal("meow");
+    done();
+  });
+  it("can encrypt with private and be decrypted with public",function(done){
+    var keys=cryptoprom.generateRSA();
+    var encrypted=cryptoprom.encrypt(keys[0],"meow");
+    var decrypted=cryptoprom.decrypt(keys[1],encrypted);
+    expect(decrypted).to.equal("meow");
+      done();
+  });
+  it("can sign with private and verify with public",function(done){
+    var keys=cryptoprom.generateRSA();
+    var stringtosign="HAMSTERDANCE";
+    var signed=cryptoprom.signString(stringtosign,keys[0]);
+    var verify=cryptoprom.verifySignedString(stringtosign,signed,keys[1]);
+    expect(verify).to.equal(true);
+      done();
+  })
 })
 
 describe('Prometheus Real-Time',function(){
-
+  this.timeout(2000);
   var block={};
 
   it('should allow a client to connect to it',function(done){
@@ -30,6 +50,28 @@ describe('Prometheus Real-Time',function(){
       if(message.type=="Acknowledgement"){
         expect(message.response).to.equal('Accepted Request');
 
+        done();
+      }
+
+    });
+  })
+  it('should allow a client to check ID',function(done){
+      this.timeout(15000);
+    var address='127.0.0.1:8080';
+    const ws = new WebSocket('ws://'+address);
+    var nonce=Block.genid();
+    var publicID;
+    ws.on('message', function incoming(data) {
+      var message = JSON.parse(data);
+
+      if(message.type=="Acknowledgement"){
+        expect(message.response).to.equal('Accepted Request');
+        var m=JSON.stringify({type:"Identity Request",nonce:nonce});
+        publicID=message.publicID;
+        ws.send(m);
+      }else if(message.type=="Identity Response"){
+        var verified=cryptoprom.verifySignedString(nonce,message.signature,publicID);
+        expect(verified).to.equal(true);
         done();
       }
 
@@ -50,6 +92,7 @@ describe('Prometheus Real-Time',function(){
         var errormsg=message.data;
         console.log(errormsg);
       }else if(message.type=="Action Request Response"){
+        //expect the message's meta message hash to equal the hash of the message we sent
         var m=JSON.stringify({type:"Action Request",action:{blockid:block.metadata.blockid,rulesfunction:"getdata",inputdata:[]}});
         expect(message.meta.message).to.equal(Block.hash(m))
         block=new Block.block(block.metadata,message.data)

@@ -94,6 +94,7 @@ wss.on('connection', function connection(ws) {
         ws.send(JSON.stringify({type:"Identity Response",signature:signedString}));
       }else{
         ws.send(JSON.stringify({type:"Identity Request Error",data:`No nonce defined`}));
+        //we don't want people like that connecting to us, punish them
         ws.close();
       }
 

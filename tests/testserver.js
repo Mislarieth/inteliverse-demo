@@ -6,6 +6,8 @@ const Block = require('../Prometheus/Block.js')
 const cryptoprom=require('../Prometheus/PrometheusCrypto.js');
 
 
+
+/*
 describe("Crypto",function(){
   this.timeout(15000);
   var key = new NodeRSA({b: 512});
@@ -36,7 +38,7 @@ describe("Crypto",function(){
     expect(verify).to.equal(true);
       done();
   })
-})
+})*/
 
 describe('Prometheus Real-Time',function(){
   this.timeout(2000);
@@ -45,6 +47,7 @@ describe('Prometheus Real-Time',function(){
   it('should allow a client to connect to it',function(done){
     var address='127.0.0.1:8080';
     const ws = new WebSocket('ws://'+address);
+
     ws.on('message', function incoming(data) {
       var message = JSON.parse(data);
       if(message.type=="Acknowledgement"){
@@ -102,15 +105,17 @@ describe('Prometheus Real-Time',function(){
     });
   })
   var r;
+  var datatosend=5;
   it('should allow a client to add a row',function(done){
     var address='127.0.0.1:8080';
     const ws = new WebSocket('ws://'+address);
     var m;
+
     ws.on('message', function incoming(data) {
       var message = JSON.parse(data);
       if(message.type=="Acknowledgement"){
         expect(message.response).to.equal('Accepted Request');
-        m=JSON.stringify({type:"Action Request",action:{blockid:block.metadata.blockid,rulesfunction:"addrow",inputdata:[5]}});
+        m=JSON.stringify({type:"Action Request",action:{blockid:block.metadata.blockid,rulesfunction:"addrow",inputdata:[datatosend]}});
         ws.send(m)
 
       }else if(message.type=="Action Request Error"){
@@ -119,7 +124,7 @@ describe('Prometheus Real-Time',function(){
       }else if(message.type=="Action Request Response"){
         expect(message.meta.message).to.equal(Block.hash(m));
       //  expect(message.data.value.value).to.equal(5);
-        r =block.addRow(5);
+        r =block.setRow(message.data,datatosend);
         done();
       }
 
@@ -135,14 +140,18 @@ describe('Prometheus Real-Time',function(){
         var blockmeta = message.data;
         expect(message.response).to.equal('Accepted Request');
         block.blockid=blockmeta.blockid;
-        m=JSON.stringify({type:"Action Request",action:{blockid:block.blockid,rulesfunction:"setrow",inputdata:[r,5]}});
+        datatosend=25;
+        m=JSON.stringify({type:"Action Request",action:{blockid:block.blockid,rulesfunction:"setrow",inputdata:[r,datatosend]}});
         ws.send(m)
 
       }else if(message.type=="Action Request Error"){
         var errormsg=message.data;
       }else if(message.type=="Action Request Response"){
         expect(message.meta.message).to.equal(Block.hash(m));
-        expect(message.data.value).to.equal(5);
+        expect(message.data.value).to.equal(datatosend);
+        var k=block.setRow(r,datatosend);
+        expect(k.version).to.equal(message.data.version);
+
         done();
       }
 
@@ -166,9 +175,17 @@ describe('Prometheus Real-Time',function(){
       }else if(message.type=="Action Request Response"){
         expect(message.meta.message).to.equal(Block.hash(m));
         expect(message.data).to.equal(true);
+        var k=block.deleteRow(r);
+        expect(k).to.equal(true);
         done();
       }
 
     });
+  })
+  it('should print block',function(done){
+    done();
+    //console.log(block);
+
+
   })
 })
